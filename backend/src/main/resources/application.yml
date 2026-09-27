@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: collab-platform
+
+  datasource:
+    # Defaults to an in-memory H2 database so the project runs out of the box.
+    # Point these env vars at Postgres for a real deployment, e.g.:
+    #   DB_URL=jdbc:postgresql://localhost:5432/collabplatform
+    #   DB_DRIVER=org.postgresql.Driver
+    url: ${DB_URL:jdbc:h2:mem:collabplatform;DB_CLOSE_DELAY=-1}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  jwt:
+    # MUST be overridden via env var in any real deployment. Never commit a real secret.
+    secret: ${JWT_SECRET:change-this-dev-only-secret-please-override-me-1234567890}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24h
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+logging:
+  level:
+    com.collabplatform: ${LOG_LEVEL:INFO}
+
+management:
+  # Only a bare liveness/readiness check is exposed - most deployment platforms
+  # (Render, Fly.io, Railway, etc.) want something like this to poll.
+  # Nothing else (env, beans, metrics, ...) is exposed, and health responses
+  # never include component detail, so this can't leak internal state.
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
